@@ -86,9 +86,14 @@ function confirmAction() {
         })
 }
 
-function completePurchase() {
+function completePurchase(local_id, purchaseAmount, available) {
     var newQuantity = available - purchaseAmount;
+    var cost;
+    var purchaseTotal;
     var query = connection.query("SELECT * FROM products WHERE item_id=?", [local_id], function(err, res) {
+        cost = res[0].price;
+        purchaseTotal = cost * purchaseAmount;
+        console.log("Your total is: " + purchaseTotal + ". Thank you for your purchase.");
         connection.query(
             "UPDATE products SET ? WHERE?",
             [
@@ -96,29 +101,36 @@ function completePurchase() {
                     stock_quantity: newQuantity
                 },
                 {
-                    id: local_id
+                    item_id: local_id
                 }
             ]
         )
+        continueOption();
     })
-    
-    continueOption();
 }
 
-function verifyAmount() {
+function verifyAmount(local_id, purchaseAmount) {
+    console.log("local ID for query: " + local_id);
     var query = connection.query("SELECT * FROM products WHERE item_id=?", [local_id], function (err, res) {
         if (err){
             console.log("There was a problem connecting to the database. \n Please try again.");
             buyItem();
         }
-        var available = res.stock_quantity;
+        else {
+            var available = res[0].stock_quantity;
+        }
         if (purchaseAmount <= available) {
-            completePurchase();
+            console.log("product in stock");
+            completePurchase(local_id, purchaseAmount, available);
+        }
+        else {
+            console.log("Sorry, we weren't able to complete your order due to insufficient stock.");
+            confirmAction();
         }
     });
 }
 
-function selectQuantity() {
+function selectQuantity(local_id) {
     inquirer
         .prompt({
             name:"quantity",
@@ -126,8 +138,8 @@ function selectQuantity() {
             message: "How many would you like to purchase? Please enter numerals. (i.e. 50)"
         })
         .then (function(answer){
-            var purchaseAmount = parseInt(answer);
-            verifyAmount(purchaseAmount);
+            var purchaseAmount = parseInt(answer.quantity);
+            verifyAmount(local_id, purchaseAmount);
         })
 }
 
@@ -147,8 +159,8 @@ function confirmItem ( local_id ) {
             message: "Is this the item you wish to purchase?"
         })
         .then (function(answer){
-            if(answer.confirm === true) {
-                selectQuantity();
+            if(answer.confirmItem === true) {
+                selectQuantity(local_id);
             }
             else{
                 confirmAction();
