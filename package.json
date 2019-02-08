@@ -4,6 +4,9 @@
   "description": "week 12 node and MySQL homework to create a CLI \"storefront\"",
   "main": "bamazonCustomer.js",
   "scripts": {
+    "start": "node bamazonCustomer.js",
+    "lint": "eslint ./",
+    "lint:fix": "eslint --fix ./",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -19,5 +22,10 @@
   "dependencies": {
     "inquirer": "^6.2.0",
     "mysql": "^2.16.0"
+  },
+  "devDependencies": {
+    "eslint": "^5.13.0",
+    "eslint-config-airbnb-base": "^13.1.0",
+    "eslint-plugin-import": "^2.16.0"
   }
 }
